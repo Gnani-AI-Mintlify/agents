@@ -178,3 +178,8 @@ docs/
 
 # Examples for development
 examples/dev/*
+
+# Gnani local dev tooling (not for upstream)
+scripts/smoke-gnani/
+livekit-plugins/livekit-plugins-gnani/Makefile
+livekit-plugins/livekit-plugins-gnani/scripts/

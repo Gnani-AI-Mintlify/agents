@@ -17,7 +17,7 @@
 Support for speech-to-text and text-to-speech with [Gnani's Vachana platform](https://gnani.ai/).
 
 Vachana provides high-accuracy STT and low-latency TTS for Indian languages,
-including multilingual and code-switching scenarios.
+including multilingual transcription scenarios.
 
 See https://docs.livekit.io/agents/integrations/stt/gnani/ for more information.
 """

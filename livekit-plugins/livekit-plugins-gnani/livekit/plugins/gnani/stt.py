@@ -60,7 +60,6 @@ GnaniSTTLanguages = Literal[
     "pa-IN",
     "ta-IN",
     "te-IN",
-    "en-IN,hi-IN",
 ]
 
 SUPPORTED_LANGUAGES: set[str] = {
@@ -74,7 +73,6 @@ SUPPORTED_LANGUAGES: set[str] = {
     "pa-IN",
     "ta-IN",
     "te-IN",
-    "en-IN,hi-IN",
 }
 
 STREAM_SUPPORTED_LANGUAGES: set[str] = {
@@ -101,7 +99,6 @@ class GnaniSTTOptions:
     language: str
     sample_rate: int = SAMPLE_RATE_16K
     base_url: str = GNANI_STT_BASE_URL
-    preferred_language: str | None = None
     format: str = "verbatim"
     itn_native_numerals: bool = False
 
@@ -133,7 +130,6 @@ class STT(stt.STT):
         api_key: Gnani API key (falls back to GNANI_API_KEY env var).
         sample_rate: Audio sample rate for streaming (8000 or 16000).
         base_url: Vachana API base URL.
-        preferred_language: Force single-language model for this code.
         format: "verbatim" (default) or "transcribe" (enables ITN).
         itn_native_numerals: Render digits in native script when format="transcribe".
     """
@@ -145,7 +141,6 @@ class STT(stt.STT):
         api_key: str | None = None,
         sample_rate: int = SAMPLE_RATE_16K,
         base_url: str = GNANI_STT_BASE_URL,
-        preferred_language: str | None = None,
         format: GnaniSTTFormat = "verbatim",
         itn_native_numerals: bool = False,
         **kwargs: Any,
@@ -170,12 +165,17 @@ class STT(stt.STT):
         if sample_rate not in (SAMPLE_RATE_8K, SAMPLE_RATE_16K):
             raise ValueError("sample_rate must be 8000 or 16000")
 
+        if language not in SUPPORTED_LANGUAGES:
+            raise ValueError(
+                f"Unsupported language_code '{language}'. "
+                f"Choose from: {', '.join(sorted(SUPPORTED_LANGUAGES))}"
+            )
+
         self._opts = GnaniSTTOptions(
             api_key=self._api_key,
             language=language,
             sample_rate=sample_rate,
             base_url=base_url,
-            preferred_language=preferred_language,
             format=format,
             itn_native_numerals=itn_native_numerals,
         )
@@ -231,8 +231,6 @@ class STT(stt.STT):
         form_data.add_field("language_code", lang)
         form_data.add_field("format", self._opts.format)
 
-        if self._opts.preferred_language is not None:
-            form_data.add_field("preferred_language", self._opts.preferred_language)
         if self._opts.itn_native_numerals:
             form_data.add_field("itn_native_numerals", "true")
 
@@ -343,8 +341,6 @@ class SpeechStream(stt.RecognizeStream):
         }
         if self._opts.format != "verbatim":
             headers["x-format"] = self._opts.format
-        if self._opts.preferred_language is not None:
-            headers["preferred_language"] = self._opts.preferred_language
         if self._opts.itn_native_numerals:
             headers["itn_native_numerals"] = "true"
 

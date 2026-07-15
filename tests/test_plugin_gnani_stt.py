@@ -195,20 +195,12 @@ def test_stt_transcribe_format():
     assert stt._opts.format == "transcribe"
 
 
-def test_stt_default_preferred_language():
-    """STT defaults preferred_language to None."""
+def test_stt_rejects_comma_separated_language():
+    """STT rejects comma-separated language codes."""
     from livekit.plugins.gnani import STT
 
-    stt = STT(api_key="test-key")
-    assert stt._opts.preferred_language is None
-
-
-def test_stt_custom_preferred_language():
-    """STT accepts custom preferred_language."""
-    from livekit.plugins.gnani import STT
-
-    stt = STT(api_key="test-key", preferred_language="hi-IN")
-    assert stt._opts.preferred_language == "hi-IN"
+    with pytest.raises(ValueError, match="Unsupported language_code"):
+        STT(api_key="test-key", language="en-IN,ta-IN")
 
 
 def test_stt_default_itn_native_numerals():
